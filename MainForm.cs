@@ -112,7 +112,7 @@ namespace 코스닥다운로더
         }
         #endregion
 
-        private async void Run()
+        private async void Run(string _date = null)
         {
             #region 로그인
             var t로그인 = Task<bool>.Run(() => 로그인());
@@ -128,21 +128,26 @@ namespace 코스닥다운로더
             }
             #endregion
 
+
             #region Request_코스닥지수_일봉
-            var t코스닥지수 = Task<bool>.Run(() => Request_코스닥지수_일봉());
-            await t코스닥지수;
-            if (!t코스닥지수.Result)
+            string date = _date;
+            if (string.IsNullOrEmpty(_date))
             {
-                MessageBox.Show("Request_코스닥지수_일봉>> 실패");
-                return;
-            }
-            else
-            {
-                Debug.WriteLine("Request_코스닥지수_일봉>> 성공");
+                var t코스닥지수 = Task<bool>.Run(() => Request_코스닥지수_일봉());
+                await t코스닥지수;
+                if (!t코스닥지수.Result)
+                {
+                    MessageBox.Show("Request_코스닥지수_일봉>> 실패");
+                    return;
+                }
+                else
+                {
+                    date = 최근거래일.ToString();
+                    Debug.WriteLine("Request_코스닥지수_일봉>> 성공");
+                }
             }
             #endregion
 
-            string date = 최근거래일.ToString();
             string[] codes = Get_전종목(date);
 
             label_date.Text = date;
@@ -165,13 +170,33 @@ namespace 코스닥다운로더
                 MessageBox.Show("연속요청제한 종료");
                 //Application.Restart();
             }
-            //Debug.WriteLine("max sb size : " + sb_틱.Length);
+
+            //거래없음 삭제
+            int emptyCnt = empty_codes.Count;
+            if (0 < emptyCnt)
+            {
+                int sb_size = codes.Length * 8 + 2;
+                StringBuilder sb = new StringBuilder(sb_size);
+                foreach (var code in codes)
+                {
+                    if (empty_codes.Contains(code))
+                        continue;
+                    else
+                        sb.AppendLine(code);
+                }
+                sb.Length -= 2;
+
+                string path = PathManager.GetPath_전종목파일(date);
+                File.WriteAllText(path, sb.ToString());
+                Debug.WriteLine("거래없는 종목 제거 : " + emptyCnt);
+            }
         }
 
         private int 지정일 = int.MaxValue;
         StringBuilder sb_틱 = null;
         private bool complete = false;
         private string complete_code = null;
+        private List<string> empty_codes = new List<string>(64);
         private bool Download_틱(string date, string[] codes)
         {
             sb_틱 = new StringBuilder(1024 * 1024 * 16);
@@ -209,7 +234,6 @@ namespace 코스닥다운로더
                     {
                         Thread.Sleep(100);
                     }
-                    Thread.Sleep(100);
                     if (complete_code != code)
                     {
                         MessageBox.Show("complete_code != code : " + complete_code + " != " + code);
@@ -221,6 +245,10 @@ namespace 코스닥다운로더
                         string data = sb_틱.ToString();
                         File.WriteAllText(path, data);
                     }
+                    else
+                    {
+                        empty_codes.Add(code);
+                    }
                 }
             }
             return true;
@@ -229,12 +257,32 @@ namespace 코스닥다운로더
         private void 틱요청_이벤트(_DKHOpenAPIEvents_OnReceiveTrDataEvent e)
         {
             var code = e.sScrNo.Trim();
-            var cnt = API.GetRepeatCnt(e.sTrCode, e.sRQName);
             Debug.WriteLine("이벤트 >> " + code);
+
+            var cnt = API.GetRepeatCnt(e.sTrCode, e.sRQName);
+            int sPrevNext = int.Parse(e.sPrevNext);
+
+            if (0 < cnt)
+            {
+                string lastTime = API.GetCommData(e.sTrCode, e.sRQName, (cnt - 1), "체결시간").Trim();
+                int lastDate = int.Parse(lastTime.Substring(0, 8));
+                if(지정일 < lastDate)
+                {
+                    Request_틱(code, sPrevNext);
+                    return;
+                }
+            }
+            else
+            {
+                MessageBox.Show("cnt == 0 : " + code);
+                return;
+            }
+            
             for (int i = 0; i < cnt; i++)
             {
                 string time = API.GetCommData(e.sTrCode, e.sRQName, i, "체결시간").Trim();
                 int date = int.Parse(time.Substring(0, 8));
+
                 if(date < 지정일)
                 {
                     complete_code = code;
@@ -254,7 +302,7 @@ namespace 코스닥다운로더
                     sb_틱.AppendLine();
                 }
             }
-            int sPrevNext = int.Parse(e.sPrevNext);
+
             if (sPrevNext == 0)
             {
                 complete_code = code;
