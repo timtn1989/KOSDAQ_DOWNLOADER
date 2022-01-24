@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32106.194
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "코스닥다운로더", "코스닥다운로더.csproj", "{51A6ADAA-E426-47B6-BD17-327F52183DE2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{51A6ADAA-E426-47B6-BD17-327F52183DE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51A6ADAA-E426-47B6-BD17-327F52183DE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51A6ADAA-E426-47B6-BD17-327F52183DE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51A6ADAA-E426-47B6-BD17-327F52183DE2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6169AA66-DCAA-44C0-A5F0-EF0BAC22F2A5}
+	EndGlobalSection
+EndGlobal
