@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -149,25 +150,30 @@ namespace 코스닥다운로더
             #endregion
 
             string[] codes = Get_전종목(date);
-
+            int codesLength = codes.Length;
             label_date.Text = date;
-            progressBar_all.Maximum = codes.Length;
+            progressBar_all.Maximum = codesLength;
             progressBar_all.Value = 0;
             progressBar_part.Maximum = 800;
             progressBar_part.Value = 0;
 
+          
+            Thread requestThread = new Thread(() => Run_RequestThread());
+            requestThread.IsBackground = true;
+            requestThread.Start();
+
             var t다운로드 = Task<bool>.Run(() => Download_틱(date, codes));
             await t다운로드;
 
-            bool 다운로드완료 = t다운로드.Result;
-            if (다운로드완료)
+            int 다운로드완료수 = t다운로드.Result;
+            if (다운로드완료수 == codes.Length)
             {
                 progressBar_all.Value = progressBar_all.Maximum;
                 MessageBox.Show("다운로드 완료");
             }
             else
             {
-                MessageBox.Show("연속요청제한 종료");
+                MessageBox.Show("연속요청제한 종료 >> " + 다운로드완료수.ToString() + " / " + codesLength.ToString());
                 //Application.Restart();
             }
 
@@ -197,7 +203,7 @@ namespace 코스닥다운로더
         private bool complete = false;
         private string complete_code = null;
         private List<string> empty_codes = new List<string>(64);
-        private bool Download_틱(string date, string[] codes)
+        private int Download_틱(string date, string[] codes)
         {
             sb_틱 = new StringBuilder(1024 * 1024 * 16);
             지정일 = int.Parse(date);
@@ -206,7 +212,6 @@ namespace 코스닥다운로더
             for (int i = 0; i < length; i++)
             {
                 var code = codes[i];
-                //Debug.WriteLine("1) code = " + code);
                 var path = PathManager.GetPath_틱파일(date, code);
                 if (!File.Exists(path))
                 {
@@ -214,18 +219,18 @@ namespace 코스닥다운로더
                     sb_틱.Clear();
                     complete = false;
                     complete_code = null;
-                    //Debug.WriteLine("2) complete_code = null") ;
-
+                    
                     //틱요청
-                    Request_틱(code);
+                    RequestQueue.Enqueue(new Request(code, 0));
+                    Thread.Sleep(1200);
                     while (!complete)
                     {
                         Thread.Sleep(100);
                     }
                     if (complete_code != code)
                     {
-                        MessageBox.Show("complete_code != code : " + complete_code + " != " + code);
-                        return false;
+                        MessageBox.Show(string.Format("complete_code({0}) != code({1})", complete_code ,code));
+                        return i;
                     }
                     if(0 < sb_틱.Length)
                     {
@@ -248,11 +253,11 @@ namespace 코스닥다운로더
                     }));
                     if (연속조회제한)
                     {
-                        return false;
+                        return i + 1;
                     }
                 }
             }
-            return true;
+            return length;
         }
 
         private void 틱요청_이벤트(_DKHOpenAPIEvents_OnReceiveTrDataEvent e)
@@ -268,7 +273,7 @@ namespace 코스닥다운로더
                 int lastDate = int.Parse(lastTime.Substring(0, 8));
                 if(지정일 < lastDate && sPrevNext != 0)
                 {
-                    Request_틱(code, sPrevNext);
+                    RequestQueue.Enqueue(new Request(code, sPrevNext));
                     return;
                 }
             }
@@ -281,7 +286,6 @@ namespace 코스닥다운로더
                 if(date < 지정일)
                 {
                     complete_code = code;
-                    //Debug.WriteLine("3) complete_code = " + complete_code);
                     complete = true;
                     return;
                 }
@@ -301,36 +305,51 @@ namespace 코스닥다운로더
             if (sPrevNext == 0)
             {
                 complete_code = code;
-                //Debug.WriteLine("3) complete_code = " + complete_code);
                 complete = true;
                 return;
             }
             else
             {
-                Request_틱(code, sPrevNext);
+                RequestQueue.Enqueue(new Request(code, sPrevNext));
             }
         }
 
         private int requestCnt_틱 = 0;
-        private async void Request_틱(string code, int sPrevNext = 0)
+        private struct Request
         {
-            if (sPrevNext == 0)
+            public string code;
+            public int sPrevNext;
+            public Request(string _code, int _sPrevNext)
             {
-                Thread.Sleep(1200);
+                code = _code;
+                sPrevNext = _sPrevNext;
             }
-            else
+        }
+        private ConcurrentQueue<Request> RequestQueue = new ConcurrentQueue<Request>(); 
+        private void Run_RequestThread()
+        {
+            while (requestCnt_틱 < 1000)
             {
-                await Task.Delay(1200);
-            }
+                Request request;
+                if (RequestQueue.TryDequeue(out request))
+                {
+                    API.SetInputValue("종목코드", request.code);
+                    API.SetInputValue("틱범위", "1");
+                    API.SetInputValue("수정주가구분", "1");
+                    int ret = API.CommRqData("틱요청", "opt10079", request.sPrevNext, request.code);
+                    if (ret != 0)
+                        Debug.WriteLine("Request_틱 : " + ret);
+                    else
+                        ++requestCnt_틱;
 
-            ++requestCnt_틱;
-         
-            API.SetInputValue("종목코드", code);
-            API.SetInputValue("틱범위", "1");
-            API.SetInputValue("수정주가구분", "1");
-            int ret = API.CommRqData("틱요청", "opt10079", sPrevNext, code);
-            if (ret != 0)
-                Debug.WriteLine("Request_틱 : " + ret);
+                    Debug.WriteLine(request.code);
+                    Thread.Sleep(1200);
+                }
+                else
+                {
+                    Thread.Sleep(50);
+                }
+            }
         }
 
         #region 전종목
