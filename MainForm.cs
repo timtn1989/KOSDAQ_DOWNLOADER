@@ -1,17 +1,13 @@
-﻿using System;
+﻿using AxKHOpenAPILib;
+
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using AxKHOpenAPILib;
 
 namespace 코스닥다운로더
 {
@@ -189,6 +185,11 @@ namespace 코스닥다운로더
         private int n다운로드날짜 = int.MaxValue;
         private async void Run(string date = null) //_date => 당일 다운로드 아닐 경우 사용
         {
+            if (!Check_다운로드가능시간())
+            {
+                label_target.Text = "다운로드 불가 시간";
+            }
+
             #region 로그인
             var t로그인 = Task<bool>.Run(() => 로그인());
             await t로그인;
@@ -237,6 +238,7 @@ namespace 코스닥다운로더
                 string[] codes = Get_전종목(다운로드날짜);
                 int codesLength = codes.Length;
 
+                label_target.Text = "틱데이터 다운";
                 label_date.Text = 다운로드날짜;
                 progressBar_all.Maximum = codesLength;
                 progressBar_all.Value = 틱다운인덱스;
@@ -260,6 +262,7 @@ namespace 코스닥다운로더
                 string[] codes = Get_전종목(다운로드날짜);
                 int codesLength = codes.Length;
 
+                label_target.Text = "일데이터 다운";
                 label_date.Text = 다운로드날짜;
                 progressBar_all.Maximum = codesLength;
                 progressBar_all.Value = 일다운인덱스;
@@ -279,7 +282,7 @@ namespace 코스닥다운로더
 
                 if (다운로드완료)
                 {
-                    MessageBox.Show(다운로드날짜 + " 다운로드 완료");
+                    label_target.Text = "다운로드 완료";
                 }
                 else
                 {
@@ -289,9 +292,27 @@ namespace 코스닥다운로더
             }
             else
             {
-                MessageBox.Show(다운로드날짜 + " 다운로드 완료");
+                label_target.Text = "다운로드 완료";
             }
         }
+
+        private bool Check_다운로드가능시간()
+        {
+            var now = DateTime.Now;
+            //공휴일
+            if(now.DayOfWeek == DayOfWeek.Saturday || now.DayOfWeek == DayOfWeek.Sunday)
+            {
+                return true;
+            }
+            //오후 4시이전
+            if(now.TimeOfDay < new TimeSpan(16, 0, 0))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
 
         private void 거래없음삭제(string[] codes)
         {
