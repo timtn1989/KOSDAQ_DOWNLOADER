@@ -49,13 +49,37 @@ namespace 코스닥다운로더.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int TotalNum {
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string 최근다운로드일 {
             get {
-                return ((int)(this["TotalNum"]));
+                return ((string)(this["최근다운로드일"]));
             }
             set {
-                this["TotalNum"] = value;
+                this["최근다운로드일"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int 틱다운인덱스 {
+            get {
+                return ((int)(this["틱다운인덱스"]));
+            }
+            set {
+                this["틱다운인덱스"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int 일다운인덱스 {
+            get {
+                return ((int)(this["일다운인덱스"]));
+            }
+            set {
+                this["일다운인덱스"] = value;
             }
         }
     }
