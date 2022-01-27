@@ -2,11 +2,11 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="코스닥다운로더.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="SavedDate" Type="System.String" Scope="User">
+    <Setting Name="틱다운완료일" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="SavedIndex" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">0</Value>
+    <Setting Name="일다운완료일" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
     </Setting>
     <Setting Name="TotalNum" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>

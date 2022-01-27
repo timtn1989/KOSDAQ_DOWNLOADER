@@ -22,5 +22,41 @@ namespace 코스닥다운로더.Properties {
                 return defaultInstance;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string 틱다운완료일 {
+            get {
+                return ((string)(this["틱다운완료일"]));
+            }
+            set {
+                this["틱다운완료일"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string 일다운완료일 {
+            get {
+                return ((string)(this["일다운완료일"]));
+            }
+            set {
+                this["일다운완료일"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int TotalNum {
+            get {
+                return ((int)(this["TotalNum"]));
+            }
+            set {
+                this["TotalNum"] = value;
+            }
+        }
     }
 }
