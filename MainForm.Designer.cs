@@ -44,7 +44,7 @@ namespace 코스닥다운로더
             // progressBar_part
             // 
             this.progressBar_part.Location = new System.Drawing.Point(6, 50);
-            this.progressBar_part.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.progressBar_part.Margin = new System.Windows.Forms.Padding(2);
             this.progressBar_part.Maximum = 800;
             this.progressBar_part.Name = "progressBar_part";
             this.progressBar_part.Size = new System.Drawing.Size(418, 21);
@@ -86,7 +86,7 @@ namespace 코스닥다운로더
             // progressBar_all
             // 
             this.progressBar_all.Location = new System.Drawing.Point(6, 10);
-            this.progressBar_all.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.progressBar_all.Margin = new System.Windows.Forms.Padding(2);
             this.progressBar_all.Name = "progressBar_all";
             this.progressBar_all.Size = new System.Drawing.Size(418, 21);
             this.progressBar_all.TabIndex = 3;
@@ -95,7 +95,7 @@ namespace 코스닥다운로더
             // 
             this.API.Enabled = true;
             this.API.Location = new System.Drawing.Point(721, 181);
-            this.API.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.API.Margin = new System.Windows.Forms.Padding(2);
             this.API.Name = "API";
             this.API.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("API.OcxState")));
             this.API.Size = new System.Drawing.Size(79, 31);
@@ -136,9 +136,11 @@ namespace 코스닥다운로더
             this.Controls.Add(this.label1);
             this.Controls.Add(this.label_date);
             this.Controls.Add(this.progressBar_part);
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "MainForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "코스닥다운로더";
+            this.Load += new System.EventHandler(this.MainForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.API)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
